@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Table, Badge, Form, Button, Alert, Modal } f
 import { toast } from 'react-toastify';
 import { FaEnvelope, FaPause, FaTrash } from 'react-icons/fa';
 import AuthContext from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Admin = () => {
   const { user, isAuthenticated } = useContext(AuthContext);
@@ -16,6 +16,19 @@ const Admin = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteDoctorModal, setShowDeleteDoctorModal] = useState(false);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [deletingDoctor, setDeletingDoctor] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingDoctor, setAddingDoctor] = useState(false);
+  const [newDoctor, setNewDoctor] = useState({
+    name: '',
+    specialization: '',
+    experience: '',
+    fees: '',
+    timings: '',
+    isAvailable: true,
+  });
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
@@ -43,11 +56,11 @@ const Admin = () => {
       setLoading(true);
       
       // Fetch doctors
-      const doctorsRes = await axios.get('/api/doctors');
+      const doctorsRes = await api.get('/api/doctors');
       setDoctors(doctorsRes.data.data || []);
       
       // Fetch appointments for admin
-      const appointmentsRes = await axios.get('/api/appointments?isAdmin=true');
+      const appointmentsRes = await api.get('/api/appointments?isAdmin=true');
       setAppointments(appointmentsRes.data.data || []);
       
     } catch (error) {
@@ -55,6 +68,48 @@ const Admin = () => {
       toast.error('Failed to load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNewDoctorChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewDoctor(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleAddDoctor = async (e) => {
+    e.preventDefault();
+    setAddingDoctor(true);
+    try {
+      const payload = {
+        name: newDoctor.name,
+        specialization: newDoctor.specialization,
+        experience: Number(newDoctor.experience) || 1,
+        fees: Number(newDoctor.fees) || 0,
+        timings: newDoctor.timings ? newDoctor.timings.split(',').map(t => t.trim()) : undefined,
+        isAvailable: !!newDoctor.isAvailable,
+        averageRating: 0,
+      };
+
+      const res = await api.post('/api/doctors', payload);
+      if (res.data.success) {
+        toast.success('Doctor added successfully');
+        setShowAddModal(false);
+        setNewDoctor({ name: '', specialization: '', experience: '', fees: '', timings: '', isAvailable: true });
+        fetchData();
+      } else {
+        toast.error('Failed to add doctor');
+      }
+    } catch (error) {
+      console.error('Add doctor error:', error.response?.data || error.message);
+      const data = error.response?.data;
+      if (data && data.details) {
+        // show first validation message
+        toast.error(`${data.message}: ${data.details.map(d=>d.message).join('; ')}`);
+      } else {
+        toast.error(data?.message || 'Failed to add doctor');
+      }
+    } finally {
+      setAddingDoctor(false);
     }
   };
 
@@ -67,13 +122,39 @@ const Admin = () => {
     setShowDeleteModal(true);
   };
 
+  const handleDeleteDoctor = (doctor) => {
+    setDoctorToDelete(doctor);
+    setShowDeleteDoctorModal(true);
+  };
+
+  const confirmDeleteDoctor = async () => {
+    if (!doctorToDelete) return;
+    try {
+      setDeletingDoctor(true);
+      const res = await api.delete(`/api/doctors/${doctorToDelete._id}`);
+      if (res.data.success) {
+        toast.success('Doctor deleted');
+        setShowDeleteDoctorModal(false);
+        setDoctorToDelete(null);
+        fetchData();
+      } else {
+        toast.error('Failed to delete doctor');
+      }
+    } catch (error) {
+      console.error('Error deleting doctor:', error.response?.data || error.message);
+      toast.error('Failed to delete doctor');
+    } finally {
+      setDeletingDoctor(false);
+    }
+  };
+
   const confirmDeleteAppointment = async () => {
     if (!appointmentToDelete) return;
 
     try {
       setDeleting(true);
       
-      const response = await axios.delete(`/api/appointments/${appointmentToDelete._id}?isAdmin=true&userId=${user?._id}`);
+      const response = await api.delete(`/api/appointments/${appointmentToDelete._id}?isAdmin=true&userId=${user?._id}`);
       
       if (response.data.success) {
         toast.success('Appointment deleted successfully!');
@@ -151,6 +232,9 @@ const Admin = () => {
         <Col>
           <h2 className="mb-3">Admin Dashboard</h2>
           <p className="text-muted">Welcome, {user?.name}</p>
+          <div className="mt-2">
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>Add Doctor</Button>
+          </div>
         </Col>
       </Row>
 
@@ -233,6 +317,7 @@ const Admin = () => {
                     <th>Experience</th>
                     <th>Fees</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -246,6 +331,11 @@ const Admin = () => {
                         <Badge bg={doctor.isAvailable ? 'success' : 'danger'}>
                           {doctor.isAvailable ? 'Available' : 'Unavailable'}
                         </Badge>
+                      </td>
+                      <td>
+                        <Button size="sm" variant="outline-danger" onClick={() => handleDeleteDoctor(doctor)} title="Delete Doctor">
+                          <FaTrash />
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -360,6 +450,79 @@ const Admin = () => {
             )}
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Delete Doctor Modal */}
+      <Modal show={showDeleteDoctorModal} onHide={() => !deletingDoctor && setShowDeleteDoctorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete Doctor</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {doctorToDelete && (
+            <div>
+              <p>Are you sure you want to delete this doctor?</p>
+              <div className="bg-light p-3 rounded">
+                <p><strong>Name:</strong> {doctorToDelete.name || 'Unknown'}</p>
+                <p><strong>Specialization:</strong> {doctorToDelete.specialization || 'N/A'}</p>
+                <p><strong>Experience:</strong> {doctorToDelete.experience || 0} years</p>
+              </div>
+              <p className="text-danger mt-3"><strong>This action cannot be undone.</strong></p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteDoctorModal(false)} disabled={deletingDoctor}>Cancel</Button>
+          <Button variant="danger" onClick={confirmDeleteDoctor} disabled={deletingDoctor}>
+            {deletingDoctor ? (
+              <>
+                <div className="spinner-border spinner-border-sm me-2" />
+                Deleting...
+              </>
+            ) : (
+              'Delete Doctor'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Doctor Modal */}
+      <Modal show={showAddModal} onHide={() => !addingDoctor && setShowAddModal(false)}>
+        <Form onSubmit={handleAddDoctor}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add New Doctor</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-2">
+              <Form.Label>Name</Form.Label>
+              <Form.Control name="name" value={newDoctor.name} onChange={handleNewDoctorChange} required />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Specialization</Form.Label>
+              <Form.Control name="specialization" value={newDoctor.specialization} onChange={handleNewDoctorChange} placeholder="e.g., Cardiology" required />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Experience (years)</Form.Label>
+              <Form.Control type="number" min={0} name="experience" value={newDoctor.experience} onChange={handleNewDoctorChange} />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Fees (₹)</Form.Label>
+              <Form.Control type="number" min={0} name="fees" value={newDoctor.fees} onChange={handleNewDoctorChange} />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Timings (comma separated)</Form.Label>
+              <Form.Control name="timings" value={newDoctor.timings} onChange={handleNewDoctorChange} placeholder="09:00 AM - 12:00 PM, 02:00 PM - 05:00 PM" />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Check type="checkbox" label="Available" name="isAvailable" checked={newDoctor.isAvailable} onChange={handleNewDoctorChange} />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowAddModal(false)} disabled={addingDoctor}>Cancel</Button>
+            <Button variant="primary" type="submit" disabled={addingDoctor}>
+              {addingDoctor ? 'Adding...' : 'Add Doctor'}
+            </Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
     </Container>
   );

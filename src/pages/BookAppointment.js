@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-b
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../utils/api';
 import AuthContext from '../context/AuthContext';
 import { format } from 'date-fns';
 
@@ -31,7 +31,7 @@ const BookAppointment = () => {
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
-        const res = await axios.get(`/api/doctors/${doctorId}`);
+        const res = await api.get(`/api/doctors/${doctorId}`);
         setDoctor(res.data.data);
         setLoading(false);
       } catch (err) {
@@ -88,7 +88,7 @@ const BookAppointment = () => {
 
       console.log('Booking appointment with data:', appointmentData);
 
-      const res = await axios.post('/api/appointments', appointmentData);
+      const res = await api.post('/api/appointments', appointmentData);
       
       if (res.data.success) {
         toast.success('Appointment booked successfully!');

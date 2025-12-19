@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-toastify';
 
-// Set base URL for API requests
-axios.defaults.baseURL = 'http://localhost:5000';
+// Using centralized api client with baseURL configured
 
 const AuthContext = createContext();
 
@@ -61,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Registering user:', { ...userData, password: '[HIDDEN]' });
       
-      const res = await axios.post('/api/auth/register', userData);
+      const res = await api.post('/api/auth/register', userData);
       
       console.log('Registration response:', res.data);
       
@@ -113,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Logging in user:', email);
       
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await api.post('/api/auth/login', { email, password });
       
       console.log('Login response:', res.data);
       
@@ -208,7 +207,7 @@ export const AuthProvider = ({ children }) => {
   // Logout user
   const logout = async () => {
     try {
-      await axios.get('/api/auth/logout');
+      await api.get('/api/auth/logout');
     } catch (err) {
       console.error('Logout error:', err);
     }

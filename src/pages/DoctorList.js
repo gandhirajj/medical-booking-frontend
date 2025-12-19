@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Spinner, Alert } from 'react-bootstrap';
-import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
-import axios from 'axios';
+// rating stars removed
+import api from '../utils/api';
 
 const DoctorList = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +17,7 @@ const DoctorList = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await axios.get('/api/doctors');
+        const res = await api.get('/api/doctors');
         // Backend returns { success: true, count: number, data: [...] }
         const doctorsArray = res.data.data || [];
         setDoctors(doctorsArray);
@@ -48,24 +48,7 @@ const DoctorList = () => {
       })
     : [];
 
-  // Render star ratings
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<FaStar key={i} className="text-warning" />);
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push(<FaStarHalfAlt key={i} className="text-warning" />);
-      } else {
-        stars.push(<FaRegStar key={i} className="text-warning" />);
-      }
-    }
-
-    return stars;
-  };
+  // ratings removed
 
   return (
     <Container>
@@ -123,16 +106,7 @@ const DoctorList = () => {
                   <Card.Subtitle className="mb-2 text-muted">
                     {doctor.specialization}
                   </Card.Subtitle>
-                  <div className="mb-2">
-                    {renderStars(doctor.averageRating || 0)}
-                    <span className="ms-1">
-                      {doctor.averageRating > 0 ? (
-                        `(${doctor.averageRating.toFixed(1)}) from ${doctor.numberOfReviews} reviews`
-                      ) : (
-                        <span className="text-muted">No reviews yet</span>
-                      )}
-                    </span>
-                  </div>
+                  {/* Ratings removed */}
                   <Card.Text>
                     <strong>Experience:</strong> {doctor.experience || 0} years
                     <br />

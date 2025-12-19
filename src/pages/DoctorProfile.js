@@ -1,8 +1,8 @@
 import { useState, useContext, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Badge, ListGroup, Tab, Tabs, Spinner } from 'react-bootstrap';
-import { FaStar, FaStarHalfAlt, FaRegStar, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
-import axios from 'axios';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import api from '../utils/api';
 import { format } from 'date-fns';
 import AuthContext from '../context/AuthContext';
 
@@ -16,7 +16,7 @@ const DoctorProfile = () => {
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
-        const res = await axios.get(`/api/doctors/${id}`);
+        const res = await api.get(`/api/doctors/${id}`);
         setDoctor(res.data.data);
         setLoading(false);
       } catch (err) {
@@ -28,23 +28,7 @@ const DoctorProfile = () => {
     fetchDoctor();
   }, [id]);
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<FaStar key={i} className="text-warning" />);
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push(<FaStarHalfAlt key={i} className="text-warning" />);
-      } else {
-        stars.push(<FaRegStar key={i} className="text-warning" />);
-      }
-    }
-
-    return stars;
-  };
+  // Ratings removed
 
   if (loading) {
     return (
@@ -84,12 +68,7 @@ const DoctorProfile = () => {
               <Card.Subtitle className="mb-3 text-muted">
                 {doctor.specialization}
               </Card.Subtitle>
-              <div className="mb-3">
-                {renderStars(doctor.averageRating)}
-                <span className="ms-1">
-                  ({doctor.averageRating?.toFixed(1)}) from {doctor.numberOfReviews} reviews
-                </span>
-              </div>
+              {/* Ratings removed */}
               <div className="d-grid gap-2">
                 {isAuthenticated ? (
                   <Button
@@ -197,27 +176,7 @@ const DoctorProfile = () => {
                   </div>
                 </Tab>
 
-                <Tab eventKey="reviews" title="Reviews">
-                  <h5>Patient Reviews</h5>
-                  {doctor.reviews && doctor.reviews.length > 0 ? (
-                    <ListGroup variant="flush">
-                      {doctor.reviews.map((review, index) => (
-                        <ListGroup.Item key={index}>
-                          <div className="d-flex justify-content-between">
-                            <strong>{review.user?.name || 'Anonymous'}</strong>
-                            <small>{format(new Date(review.createdAt), 'MMM dd, yyyy')}</small>
-                          </div>
-                          <div className="mb-1">
-                            {renderStars(review.rating)}
-                          </div>
-                          <p className="mb-0">{review.comment}</p>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  ) : (
-                    <p>No reviews yet</p>
-                  )}
-                </Tab>
+                {/* Reviews tab removed */}
               </Tabs>
             </Card.Body>
           </Card>

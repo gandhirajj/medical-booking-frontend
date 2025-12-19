@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Table, Badge, Spinner, Alert, Modal 
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 // import { FaVolumeUp, FaPlay, FaBell } from 'react-icons/fa';
-import axios from 'axios';
+import api from '../utils/api';
 import AuthContext from '../context/AuthContext';
 
 
@@ -28,7 +28,7 @@ const Dashboard = () => {
         const query = isAdmin
           ? `/api/appointments?isAdmin=true`
           : `/api/appointments?userId=${user._id}`;
-        const res = await axios.get(query);
+        const res = await api.get(query);
         setAppointments(res.data.data);
         setLoading(false);
       } catch (err) {
@@ -42,7 +42,7 @@ const Dashboard = () => {
 
   const handleCancelAppointment = async (id) => {
     try {
-      await axios.put(`/api/appointments/${id}?userId=${user._id}`, { status: 'cancelled' });
+      await api.put(`/api/appointments/${id}?userId=${user._id}`, { status: 'cancelled' });
 
       // Update appointments list
       setAppointments(

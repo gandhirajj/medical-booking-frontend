@@ -464,7 +464,7 @@ const MedicalChatbot = () => {
     if (
       lowerMsg.includes("book an appointment") ||
       lowerMsg.includes("help me book") ||
-      lowerMsg.includes("help me book an appointment") ||
+      lowerMsg.includes("help me to book an appointment") ||
       lowerMsg.includes("Can you help me schedule an appointment?") ||
       lowerMsg.includes("book an make an appointment")||lowerMsg.includes("I need to book a consultation")||lowerMsg.includes("Please schedule me for an appointment")
     ) {
@@ -576,190 +576,97 @@ const MedicalChatbot = () => {
   };
 
   return (
-    <div
-      style={{
-        fontFamily: "Arial, sans-serif",
-        padding: "20px",
-        maxWidth: "700px",
-        margin: "auto",
-      }}
-    >
-      <h1 style={{ textAlign: "center", color: "#2a6f97" }}>
-        Medical Chatbot
-      </h1>
-
-      <div style={{ marginBottom: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-        <div style={{ display: "flex", gap: "12px", width: "100%", justifyContent: "center" }}>
-          <button
-            onClick={startListening}
-            disabled={isListening}
-            style={{
-              padding: "10px 18px",
-              background: isListening ? "#f87171" : "#38bdf8",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              minWidth: "150px",
-              fontWeight: 500
-            }}
-          >
-            {isListening ? "Listening..." : "Start Speaking 🎙"}
-          </button>
-          <button
-            type="button"
-            onClick={clearChat}
-            style={{
-              padding: "10px 18px",
-              background: "#f87171",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              minWidth: "120px",
-              fontWeight: 500
-            }}
-          >
-            Clear Chat
-          </button>
+    <div style={{ fontFamily: "Arial, sans-serif", padding: "28px 16px", background: "#f6f8fb", minHeight: "100vh" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <h1 style={{ color: "#1e88e5", fontSize: 36, margin: 0 }}>Medical Chatbot</h1>
+          <p style={{ color: "#6b7280", marginTop: 8 }}>Ask about symptoms, doctors, appointments or CT predictions</p>
         </div>
-        <form onSubmit={handleTextSend} style={{ display: "flex", gap: "12px", width: "100%", justifyContent: "center", alignItems: "center" }}>
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Describe symptoms, ask about appointments or CT prediction..."
-            style={{
-              padding: "10px",
-              width: "320px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: "1rem"
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              padding: "10px 18px",
-              background: "#4ade80",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontWeight: 500
-            }}
-          >
-            Send 💬
-          </button>
-        </form>
-      </div>
 
-      {/* ✅ Speak & Stop Buttons */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        {response && (
-          <>
-            <button
-              onClick={() => speakResponse(response)}
-              style={{
-                padding: "10px 15px",
-                background: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                marginRight: "10px",
-              }}
-            >
-              🔊 Speak Response
-            </button>
-            <button
-              onClick={stopSpeaking}
-              style={{
-                padding: "10px 15px",
-                background: "#ef4444",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              ⏹ Stop Speech
-            </button>
-          </>
-        )}
-      </div>
+        <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+          {/* Left: Chat Card */}
+          <div style={{ flex: 1, minWidth: 320 }}>
+            <div style={{ background: "#ffffff", borderRadius: 10, padding: 16, boxShadow: "0 6px 20px rgba(36,37,38,0.06)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 8, background: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center", color: "#0284c7", fontWeight: 700 }}>AI</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Medical Assistant</div>
+                    <div style={{ fontSize: 12, color: "#6b7280" }}>General medical guidance (informational only)</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={startListening} disabled={isListening} style={{ padding: "8px 12px", background: isListening ? "#ef4444" : "#38bdf8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}>{isListening ? 'Listening...' : 'Start Speaking 🎙'}</button>
+                  <button onClick={clearChat} style={{ padding: "8px 12px", background: "#fb7185", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}>Clear</button>
+                </div>
+              </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <h3>Your Medical Summary:</h3>
-        {userPreferences.symptoms.length > 0 && (
-          <p>
-            <strong>Symptoms:</strong>{" "}
-            {userPreferences.symptoms.join(", ")}
-          </p>
-        )}
-        {userPreferences.conditions.length > 0 && (
-          <p>
-            <strong>Conditions:</strong>{" "}
-            {userPreferences.conditions.join(", ")}
-          </p>
-        )}
-        {userPreferences.medications.length > 0 && (
-          <p>
-            <strong>Medications:</strong>{" "}
-            {userPreferences.medications.join(", ")}
-          </p>
-        )}
-        {userPreferences.lastConsultation && (
-          <p>
-            <strong>Last Consultation:</strong>{" "}
-            {userPreferences.lastConsultation}
-          </p>
-        )}
-        {userPreferences.symptoms.length === 0 &&
-          userPreferences.conditions.length === 0 &&
-          userPreferences.medications.length === 0 &&
-          !userPreferences.lastConsultation && (
-            <p>
-              No health details saved yet. Share your symptoms or conditions
-              to get started.
-            </p>
-          )}
-      </div>
+              <div style={{ borderTop: "1px solid #eef2f7", paddingTop: 12, marginBottom: 12 }}>
+                <div style={{ maxHeight: 360, overflowY: "auto", paddingRight: 8 }}>
+                  {chatHistory.length === 0 && !response && (
+                    <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>No messages yet. Describe your symptoms or ask a question.</div>
+                  )}
 
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "10px",
-          borderRadius: "5px",
-          maxHeight: "300px",
-          overflowY: "auto",
-        }}
-      >
-        {chatHistory.map((chat, index) => (
-          <div key={index} style={{ marginBottom: "10px" }}>
-            <strong
-              style={{
-                color: chat.sender === "user" ? "#2563eb" : "#059669",
-              }}
-            >
-              {chat.sender === "user" ? "You" : "Assistant"}:
-            </strong>
-            <div style={{ marginLeft: "10px" }}>{chat.message}</div>
+                  {chatHistory.map((chat, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: chat.sender === 'user' ? 'flex-end' : 'flex-start', marginBottom: 10 }}>
+                      <div style={{ maxWidth: '78%', background: chat.sender === 'user' ? '#2563eb' : '#ecfccb', color: chat.sender === 'user' ? '#fff' : '#064e3b', padding: '10px 12px', borderRadius: 8, boxShadow: '0 1px 2px rgba(16,24,40,0.04)', whiteSpace: 'pre-wrap' }}>
+                        <div style={{ fontSize: 14 }}>{chat.message}</div>
+                        <div style={{ fontSize: 11, color: chat.sender === 'user' ? 'rgba(255,255,255,0.75)' : '#4b5563', marginTop: 6 }}>{/* timestamp could go here */}</div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {response && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 10 }}>
+                      <div style={{ maxWidth: '78%', background: '#f1f5f9', color: '#0f172a', padding: '10px 12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{response}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <form onSubmit={handleTextSend} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <input value={userInput} onChange={(e)=>setUserInput(e.target.value)} placeholder="Describe symptoms, ask about appointments or CT prediction..." style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid #e6edf3' }} />
+                <button type="submit" style={{ padding: '10px 14px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Send 💬</button>
+              </form>
+
+              {response && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <button onClick={() => speakResponse(response)} style={{ padding: '8px 12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6 }}>🔊 Speak</button>
+                  <button onClick={stopSpeaking} style={{ padding: '8px 12px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6 }}>⏹ Stop</button>
+                </div>
+              )}
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* ⚠️ Disclaimer */}
-      <div
-        style={{
-          marginTop: "20px",
-          fontSize: "14px",
-          color: "#b91c1c",
-          textAlign: "center",
-        }}
-      >
-        ⚠️ This chatbot is for informational purposes only and is not a
-        substitute for professional medical advice.
+          {/* Right: Summary / Quick Info */}
+          <aside style={{ width: 320, minWidth: 260 }}>
+            <div style={{ background: '#fff', borderRadius: 10, padding: 14, boxShadow: '0 6px 20px rgba(36,37,38,0.04)' }}>
+              <h3 style={{ margin: 0, color: '#0f172a' }}>Your Medical Summary</h3>
+              <div style={{ marginTop: 10, color: '#374151', fontSize: 14 }}>
+                {userPreferences.symptoms.length > 0 && <p style={{ margin: '6px 0' }}><strong>Symptoms:</strong> {userPreferences.symptoms.join(', ')}</p>}
+                {userPreferences.conditions.length > 0 && <p style={{ margin: '6px 0' }}><strong>Conditions:</strong> {userPreferences.conditions.join(', ')}</p>}
+                {userPreferences.medications.length > 0 && <p style={{ margin: '6px 0' }}><strong>Medications:</strong> {userPreferences.medications.join(', ')}</p>}
+                {userPreferences.lastConsultation && <p style={{ margin: '6px 0' }}><strong>Last visit:</strong> {userPreferences.lastConsultation}</p>}
+
+                {userPreferences.symptoms.length === 0 && userPreferences.conditions.length === 0 && userPreferences.medications.length === 0 && !userPreferences.lastConsultation && (
+                  <p style={{ color: '#9ca3af', marginTop: 6 }}>No health details saved yet. Share symptoms to populate this summary.</p>
+                )}
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 13, color: '#6b7280' }}>Quick Actions</div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <a href="/" style={{ flex: 1, textDecoration: 'none', textAlign: 'center', padding: '8px 10px', borderRadius: 8, background: '#eef2ff', color: '#1e3a8a' }}>Doctors</a>
+                  <a href="/pneumonia" style={{ flex: 1, textDecoration: 'none', textAlign: 'center', padding: '8px 10px', borderRadius: 8, background: '#ecfdf5', color: '#065f46' }}>CT Prediction</a>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 20, color: '#b91c1c' }}>
+          ⚠️ This chatbot is for informational purposes only and is not a substitute for professional medical advice.
+        </div>
       </div>
     </div>
   );
